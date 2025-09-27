@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Movie Genre Classification</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f8ff; text-align: center; padding: 50px; }
+    h1 { color: #2c3e50; }
+    textarea { width: 70%; height: 150px; padding: 12px; font-size: 16px; border-radius: 10px; border: 1px solid #ccc; }
+    button { margin-top: 20px; padding: 15px 30px; font-size: 18px; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer; }
+    button:hover { background: #2980b9; }
+    #result { margin-top: 25px; font-size: 18px; font-weight: bold; color: #34495e; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <h1>🎬 Movie Genre Classification</h1>
+  <p>Enter your movie plot below and discover its predicted genre.</p>
+  <textarea id="plot" placeholder="Type or paste a movie plot here..."></textarea><br>
+  <button onclick="predictGenre()">Predict Genre</button>
+  <div id="result"></div>
+
+  <script>
+    async function predictGenre() {
+      const plot = document.getElementById("plot").value.trim();
+      if(!plot){ alert("Please enter a plot"); return; }
+
+      const resp = await fetch("/predict", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({plot})
+      });
+      const data = await resp.json();
+      if(data.error){ document.getElementById("result").innerText = data.error; return; }
+
+      let text = `⭐ Top prediction: ${data.genre}\n\n📌 Top candidates:\n`;
+      data.top.forEach(t => { text += `- ${t.genre} — ${(t.prob*100).toFixed(1)}%\n`; });
+      document.getElementById("result").innerText = text;
+    }
+  </script>
+</body>
+</html>
